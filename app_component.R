@@ -1,56 +1,49 @@
-
-# Nav component
-
-navigation_styles <- list(
-  root = list(
-    height = "100%",
-    boxSizing = "border-box",
-    border = "1px solid #eee",
-    overflowY = "auto"
+library(shiny.fluent)
+library(shiny)
+library(DT)
+source("app_interfunction.R")
+load("interdata.rda")
+cancerType = names(spatial_info)
+cellType = c("All","T", "B", "Myeloid", "Epithelial", "Fibroblast", "Endothelial")
+selecter <- tagList(
+  Dropdown.shinyInput(inputId = "cancerType",options = make_list(cancerType, cancerType), label = "Cancer", value = "PRAD"),
+  uiOutput("slidePicker"),
+  uiOutput("labelPicker"),
+  Checkbox.shinyInput(inputId = "subtype",value = FALSE, label = "Subtype"),
+  Dropdown.shinyInput(inputId = "cellType",options = make_list(cellType, cellType),  value = "All")
+)
+piePlot <- Stack(
+  tokens = list(childrenGap = 10),horizontal = TRUE,
+  plotOutput("pieChart", width = "600px", height = "450px"),
+  Stack(
+    tokens = list(childrenGap = 5),
+    Checkbox.shinyInput("percentage", value = FALSE, label = "Percentage"),
+    Checkbox.shinyInput("logFreq", value = FALSE, label = "Log Freq")
   )
 )
 
-plot_link = list(
-  list(
-    name = "Label",
-    key = "key1",
-    target = "_blank"
-  )
+spatialPlot <- Stack(
+  tokens = list(childrenGap = 5),
+  Slider.shinyInput("spotSize", value = 0.1, min = 0.1, max =1, step = 0.01, label = "Spot Size"),
+  plotOutput("spatialPlot", width = "600px", height = "600px")
 )
 
-link_groups <- list(
-  list(
-    links = list(
-      list(
-        name = "Plot",
-        expandAriaLabel = "Expand Plot section",
-        collapseAriaLabel = "Collapse Plot section",
-        links = plot_link,
-        isExpanded = TRUE
-      ),
-      list(
-        name = "Tutorial",
-        url = "http://example.com",
-        key = "tutorial",
-        isExpanded = TRUE
-      ),
-      list(
-        name = "News",
-        url = "http://cnn.com",
-        icon = "News",
-        key = "key7",
-        target = "_blank",
-        iconProps = list(
-          iconName = "News",
-          styles = list(
-            root = list(
-              fontSize = 20,
-              color = "#106ebe"
-            )
-          )
-        )
-      )
-    )
-  )
+cellTypeSelecter <- tagList(
+  Checkbox.shinyInput("spatialSubtype", value = FALSE, label = "Subtype"),
+  uiOutput("subtypeSelecter")
 )
+
+spatialData <- Stack(
+  tokens = list(childrenGap = 10), horizontal = TRUE,
+  makeCard("Spatial Plot", spatialPlot, size = 8, style = "max-height: 800px"),
+  makeCard("Cell Type", cellTypeSelecter, size = 4, style = "max-height: 800px")
+)
+
+
+ summarize <- Stack(
+   tokens = list(childrenGap = 10), horizontal = TRUE,
+   makeCard("STPLOT", selecter, size = 4, style = "max-height: 450px"),
+   makeCard("Summarize", piePlot, size = 8, style = "max-height: 450px")
+)
+
 
